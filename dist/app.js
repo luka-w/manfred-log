@@ -25,6 +25,56 @@ const node = (tag, text, className) => {
   if (className) el.className = className;
   return el;
 };
+// Public embed identifier supplied by Remarkbox; not a login credential.
+const remarkboxOwner = "67ef1d2d-adcd-11f1-992d-040140774501";
+let remarkboxResizer;
+function loadRemarkboxResizer() {
+  if (!remarkboxResizer) remarkboxResizer = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://my.remarkbox.com/static/js/iframe-resizer/iframeResizer.min.js";
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.append(script);
+  });
+  return remarkboxResizer;
+}
+function commentsFor(entry) {
+  const section = node("details", "", "comments");
+  section.id = `comments-${entry.slug}`;
+  section.append(node("summary", "Comments"));
+  const notice = node("p", "Comments are hosted by Remarkbox. Opening this section connects to their service.", "meta");
+  // One stable, public URL per entry; never send localhost or tracking queries.
+  const thread = new URL("https://luka-w.github.io/manfred-log/");
+  thread.searchParams.set("post", entry.slug);
+  const source = new URL("https://my.remarkbox.com/embed");
+  source.searchParams.set("rb_owner_key", remarkboxOwner);
+  source.searchParams.set("thread_title", `${entry.title} — Manfred`);
+  source.searchParams.set("thread_uri", thread.href);
+  source.searchParams.set("mode", "light");
+  const fallback = node("a", "Open comments in a new tab");
+  fallback.href = source.href;
+  fallback.target = "_blank";
+  fallback.rel = "noopener noreferrer";
+  section.append(notice, fallback);
+  let loaded = false;
+  section.addEventListener("toggle", () => {
+    if (!section.open || loaded) return;
+    loaded = true;
+    const frame = node("iframe", "", "comments-frame");
+    frame.id = `remarkbox-${entry.slug}`;
+    frame.title = `Comments on ${entry.title}`;
+    frame.src = source.href;
+    frame.referrerPolicy = "strict-origin-when-cross-origin";
+    section.append(frame);
+    loadRemarkboxResizer().then(() => {
+      window.iFrameResize({checkOrigin: ["https://my.remarkbox.com"], inPageLinks: true}, frame);
+    }).catch(() => {
+      // Keep a scrollable frame and the direct link if the resize script fails.
+      notice.textContent += " Automatic sizing is unavailable; scroll inside the comments or use the link above.";
+    });
+  });
+  return section;
+}
 fetch("content.json").then(response => {
   if (!response.ok) throw new Error("Content unavailable");
   return response.json();
@@ -53,6 +103,12 @@ fetch("content.json").then(response => {
       figure.append(video, node("figcaption", clip.caption));
       article.append(figure);
     }
+    article.append(commentsFor(entry));
     return article;
   }));
+  const selected = new URLSearchParams(window.location.search).get("post");
+  if (selected && entries.some(entry => entry.slug === selected)) {
+    document.getElementById(`comments-${selected}`).open = true;
+    document.getElementById(selected).scrollIntoView();
+  }
 }).catch(() => { document.getElementById("error").hidden = false; });
