@@ -38,7 +38,8 @@ fetch("content.json").then(response => {
   document.getElementById("entries").replaceChildren(...entries.map(entry => {
     const article = node("article", "", "entry");
     article.id = entry.slug;
-    article.append(node("p", `${entry.date} / ${entry.context}`, "meta"), node("h3", entry.title), node("p", entry.text));
+    article.append(node("p", `${entry.date} / ${entry.context}`, "meta"), node("h3", entry.title));
+    for (const paragraph of entry.text.split(/\n\s*\n/)) article.append(node("p", paragraph));
     if (entry.next) article.append(node("p", `Next: ${entry.next}`));
     const clips = entry.videos || (entry.video ? [{src: entry.video, caption: entry.title}] : []);
     for (const clip of clips) {
