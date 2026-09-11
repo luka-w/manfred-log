@@ -1,0 +1,19 @@
+{
+  "hardware": [],
+  "software": [],
+  "entries": [
+    {
+      "slug": "push-recovery-tests",
+      "date": "2026-09-11",
+      "context": "Simulation · AI-written",
+      "title": "Push recovery: 1 N, 3 N, 5 N",
+      "text": "Manfred recovered from 1 N and 3 N pushes in all four directions, but fell at 5 N. Each push lasted 0.2 s; the policy was unchanged. These MuJoCo/MJX results describe this test only—not hardware readiness. Videos below show backward pushes, applied at 5 seconds.",
+      "next": "Test slightly offset starting poses, then ONNX inference in standard MuJoCo.",
+      "videos": [
+        {"src": "media/push-1n-back.mp4", "caption": "1 N / 0.2 s — recovered."},
+        {"src": "media/push-3n-back.mp4", "caption": "3 N / 0.2 s — recovered after a larger tilt."},
+        {"src": "media/push-5n-back.mp4", "caption": "5 N / 0.2 s — fell; recording ends when the trial terminates."}
+      ]
+    }
+  ]
+}
