@@ -1,4 +1,24 @@
 "use strict";
+const copyEmail = document.getElementById("copy-email");
+if (copyEmail) {
+  copyEmail.addEventListener("click", async () => {
+    const status = document.getElementById("copy-status");
+    status.textContent = "";
+    try {
+      await navigator.clipboard.writeText(document.getElementById("contact-email").textContent.trim());
+      status.textContent = "Copied!";
+    } catch {
+      const range = document.createRange();
+      range.selectNodeContents(document.getElementById("contact-email"));
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      status.textContent = "Could not copy automatically. Copy the selected address manually.";
+    }
+  });
+}
 const node = (tag, text, className) => {
   const el = document.createElement(tag);
   if (text) el.textContent = text;
@@ -9,7 +29,7 @@ fetch("content.json").then(response => {
   if (!response.ok) throw new Error("Content unavailable");
   return response.json();
 }).then(data => {
-  for (const section of ["hardware", "software"]) {
+  for (const section of ["hardware", "software", "specifications"]) {
     if (data[section].length) document.getElementById(section).replaceChildren(...data[section].map(text => node("li", text)));
   }
   const entries = [...data.entries].sort((a, b) => b.date.localeCompare(a.date));

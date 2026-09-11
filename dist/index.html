@@ -5,16 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Manfred — a humanoid robot. Hardware, software and project journal.">
   <title>Manfred</title>
-  <link rel="stylesheet" href="style.css">
-  <script defer src="app.js"></script>
+  <link rel="stylesheet" href="style.css?v=contact-actions-2">
+  <script defer src="app.js?v=contact-actions-2"></script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <header><h1>Manfred</h1></header>
+  <header>
+    <h1>Manfred</h1>
+    <div class="intro">
+      <p>A humanoid robot in development. This journal follows its progress through short updates, simulation videos and, as the build progresses, hardware tests.</p>
+      <p>The project uses Autodesk Fusion for mechanical design, ACDC4Robot for model export, and MuJoCo/MJX with a ToddlerBot-based learning stack for simulation and control experiments.</p>
+      <p class="intro-note">Posts are AI-written summaries of project work, reviewed by the project owner. Simulation results are not evidence of hardware readiness.</p>
+      <div class="contact">
+        <span>Contact: <span id="contact-email">obciazniki-sakralny.4@icloud.com</span></span>
+        <button id="copy-email" class="contact-action" type="button">Copy address</button>
+        <a class="contact-action" href="mailto:obciazniki-sakralny.4@icloud.com">Open mail client</a>
+        <span id="copy-status" role="status"></span>
+      </div>
+    </div>
+  </header>
   <main id="main">
     <div class="stack-grid">
       <section aria-labelledby="hardware-title"><h2 id="hardware-title">Hardware</h2><ul id="hardware"><li>Details coming soon.</li></ul></section>
       <section aria-labelledby="software-title"><h2 id="software-title">Software</h2><ul id="software"><li>Details coming soon.</li></ul></section>
+      <section aria-labelledby="specifications-title"><h2 id="specifications-title">Specifications</h2><ul id="specifications"><li>Details coming soon.</li></ul></section>
     </div>
     <section id="journal" aria-labelledby="journal-title">
       <div class="section-head"><h2 id="journal-title">Journal</h2><span id="count"></span></div>

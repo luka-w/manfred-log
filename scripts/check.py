@@ -6,8 +6,8 @@ from datetime import date
 
 root = Path(__file__).resolve().parents[1] / "dist"
 data = json.loads((root / "content.json").read_text())
-assert set(data) == {"hardware", "software", "entries"}
-for section in ("hardware", "software"):
+assert set(data) == {"hardware", "software", "specifications", "entries"}
+for section in ("hardware", "software", "specifications"):
     assert isinstance(data[section], list) and all(isinstance(x, str) for x in data[section])
 assert isinstance(data["entries"], list)
 slugs = set()
