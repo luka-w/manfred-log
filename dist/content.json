@@ -4,6 +4,20 @@
   "specifications": [],
   "entries": [
     {
+      "slug": "tilted-starts-10-15-degrees",
+      "date": "2026-09-11",
+      "context": "Simulation · AI-written",
+      "title": "Finding the limit: 10° and 15° tilted starts",
+      "text": "Manfred’s trained standing policy tries to return to its upright reference pose. With no retraining, it recovered in all four tested directions from 10° starts. At 15°, it fell forward/backward or made contact between its legs during sideways trials. These are tilted starts, not pushes, in MuJoCo/MJX—not hardware tests. Clips compare forward and leftward starts; failed trials end early.",
+      "next": "Check ONNX in standard MuJoCo, then develop walking and train recovery steps for larger disturbances instead of forcing the robot to stand in place.",
+      "videos": [
+        {"src": "media/tilt-10deg-front.mp4", "caption": "10° forward — recovered; full 15-second trial."},
+        {"src": "media/tilt-15deg-front.mp4", "caption": "15° forward — fell; trial terminated after 1.02 s."},
+        {"src": "media/tilt-10deg-left.mp4", "caption": "10° leftward — recovered; feet reposition during recovery."},
+        {"src": "media/tilt-15deg-left.mp4", "caption": "15° leftward — contact between the legs; trial terminated after 0.16 s."}
+      ]
+    },
+    {
       "slug": "push-recovery-tests",
       "date": "2026-09-11",
       "context": "Simulation · AI-written",
