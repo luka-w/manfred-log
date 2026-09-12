@@ -90,7 +90,6 @@ fetch("content.json").then(response => {
     article.id = entry.slug;
     article.append(node("p", `${entry.date} / ${entry.context}`, "meta"), node("h3", entry.title));
     for (const paragraph of entry.text.split(/\n\s*\n/)) article.append(node("p", paragraph));
-    if (entry.next) article.append(node("p", `Next: ${entry.next}`));
     const clips = entry.videos || (entry.video ? [{src: entry.video, caption: entry.title}] : []);
     for (const clip of clips) {
       // Only explicit local public media; never embed arbitrary HTML or remote URLs.
@@ -102,6 +101,22 @@ fetch("content.json").then(response => {
       video.poster = clip.src.replace(/\.mp4$/, ".jpg");
       figure.append(video, node("figcaption", clip.caption));
       article.append(figure);
+    }
+    if (entry.images?.length) {
+      const gallery = node("div", "", "image-gallery");
+      for (const picture of entry.images) {
+        if (!/^media\/[a-zA-Z0-9_/-]+\.(png|jpg|webp)$/.test(picture.src)) throw new Error("Invalid image path");
+        const figure = node("figure");
+        const link = node("a");
+        link.href = picture.src; link.target = "_blank"; link.rel = "noopener";
+        const img = node("img");
+        img.src = picture.src; img.alt = picture.caption;
+        img.loading = "lazy"; img.decoding = "async";
+        link.append(img);
+        figure.append(link, node("figcaption", picture.caption));
+        gallery.append(figure);
+      }
+      article.append(gallery);
     }
     article.append(commentsFor(entry));
     return article;

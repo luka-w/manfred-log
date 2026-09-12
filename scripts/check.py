@@ -12,14 +12,20 @@ for section in ("hardware", "software", "specifications"):
 assert isinstance(data["entries"], list)
 slugs = set()
 for entry in data["entries"]:
-    assert set(entry) <= {"slug", "date", "context", "title", "text", "next", "video", "videos"}
+    assert set(entry) <= {"slug", "date", "context", "title", "text", "video", "videos", "images"}
     for field in ("slug", "date", "context", "title", "text"):
         assert isinstance(entry[field], str) and entry[field].strip(), field
     assert re.fullmatch(r"[a-z0-9-]+", entry["slug"])
     assert entry["slug"] not in slugs
     slugs.add(entry["slug"])
     date.fromisoformat(entry["date"])
-    for field in ("next", "video"):
+    assert isinstance(entry.get("images", []), list)
+    for picture in entry.get("images", []):
+        assert set(picture) == {"src", "caption"}
+        assert isinstance(picture["caption"], str) and picture["caption"].strip()
+        assert re.fullmatch(r"media/[a-zA-Z0-9_/-]+\.(png|jpg|webp)", picture["src"])
+        assert (root / picture["src"]).is_file()
+    for field in ("video",):
         assert isinstance(entry.get(field, ""), str)
     if entry.get("video"):
         assert re.fullmatch(r"media/[a-zA-Z0-9_/-]+\.mp4", entry["video"])

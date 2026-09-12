@@ -4,12 +4,36 @@
   "specifications": [],
   "entries": [
     {
+      "slug": "why-collision-boxes",
+      "date": "2026-09-12",
+      "context": "Simulation · AI-written",
+      "title": "Collision geometry: why Manfred now uses 30 hand-built boxes",
+      "text": "A robot simulation uses two representations of the same machine: a detailed model for display, and simpler shapes for calculating contact with the ground and between body parts. These collision shapes determine where the simulator allows contact—not just where it draws the robot.\n\nDetailed geometry costs more to check, especially across repeated training steps. Simpler geometry is cheaper, but must preserve important clearances: oversized shapes create false collisions, while undersized ones can miss real contact. Manfred’s feet therefore use a sole and two side walls, preserving the space inside.\n\nAutomatically generated boxes were initially too bulky. Refining them with smaller shapes and convex meshes improved the fit, but made contact calculations expensive: one compilation was killed by the system, and another took about 18 minutes. Further automatic simplification reintroduced false contacts.\n\nThe project owner instead built 30 boxes manually in Fusion, choosing their dimensions, orientation and placement around the relevant parts. The software stack, visual model, masses and joints remain unchanged. Visual alignment and ankle-roll checks have been accepted. The new model has 394 contact pairs, none involving meshes; its performance still needs measuring.\n\nBelow: the detailed robot as a reference, followed by three collision models. All use the same pose, camera and lighting.",
+      "images": [
+        {
+          "src": "media/robot-reference.png",
+          "caption": "Visual reference. The detailed CAD model, with collision geometry hidden."
+        },
+        {
+          "src": "media/collision-auto-boxes.png",
+          "caption": "1. Automatic coarse boxes. Simple, but bulky around the upper body. This early version did not include the foot side walls."
+        },
+        {
+          "src": "media/collision-auto-refined.png",
+          "caption": "2. Automatic refined shapes. A closer fit, using boxes and convex meshes—but more expensive contact calculations."
+        },
+        {
+          "src": "media/collision-manual-30.png",
+          "caption": "3. Thirty manual Fusion boxes. Simple shapes placed deliberately, with tilted lower-leg boxes and space between the foot walls."
+        }
+      ]
+    },
+    {
       "slug": "one-brain-simulated-or-real",
       "date": "2026-09-11",
       "context": "Simulation · AI-written",
       "title": "Learn in a computer. Use the same skill in a robot.",
-      "text": "First, a simulated Manfred practises standing. The training program scores each attempt and changes how it chooses movements. After many attempts, it has a learned skill, called a policy. It is not a movie of movements: the policy chooses what to do from what the robot senses right now. Using the trained policy does not keep training it.\n\nONNX saves that skill in a file. The exact same file can run in simulation and on the real robot, without changing the policy. That is the plan for Manfred: one policy file for both, with matching inputs and outputs.\n\nThe robot repeats a simple loop 50 times a second: read its joint positions and balance sensors, let the policy choose target joint angles, send those targets to the motor controller, then read again.\n\nThe goal is to keep this loop the same for a simulated robot and a real one. Only the connection underneath changes: one reads simulated sensors and moves simulated motors; the other talks to real electronics. The policy should not need to ask which robot it controls.\n\nThe ONNX policy has now kept Manfred standing for 30 seconds in standard MuJoCo. Real hardware still needs calibration and safety testing.",
-      "next": "Develop walking and recovery steps in simulation; calibrate and test the physical robot when hardware is available."
+      "text": "First, a simulated Manfred practises standing. The training program scores each attempt and changes how it chooses movements. After many attempts, it has a learned skill, called a policy. It is not a movie of movements: the policy chooses what to do from what the robot senses right now. Using the trained policy does not keep training it.\n\nONNX saves that skill in a file. The exact same file can run in simulation and on the real robot, without changing the policy. That is the plan for Manfred: one policy file for both, with matching inputs and outputs.\n\nThe robot repeats a simple loop 50 times a second: read its joint positions and balance sensors, let the policy choose target joint angles, send those targets to the motor controller, then read again.\n\nThe goal is to keep this loop the same for a simulated robot and a real one. Only the connection underneath changes: one reads simulated sensors and moves simulated motors; the other talks to real electronics. The policy should not need to ask which robot it controls.\n\nThe ONNX policy has now kept Manfred standing for 30 seconds in standard MuJoCo. Real hardware still needs calibration and safety testing."
     },
     {
       "slug": "tilted-starts-10-15-degrees",
@@ -17,12 +41,23 @@
       "context": "Simulation · AI-written",
       "title": "Finding the limit: 10° and 15° tilted starts",
       "text": "Manfred’s trained standing policy tries to return to its upright reference pose. With no retraining, it recovered in all four tested directions from 10° starts. At 15°, it fell forward/backward or made contact between its legs during sideways trials. These are tilted starts, not pushes, in MuJoCo/MJX—not hardware tests. Clips compare forward and leftward starts; failed trials end early.",
-      "next": "Check ONNX in standard MuJoCo, then develop walking and train recovery steps for larger disturbances instead of forcing the robot to stand in place.",
       "videos": [
-        {"src": "media/tilt-10deg-front.mp4", "caption": "10° forward — recovered; full 15-second trial."},
-        {"src": "media/tilt-15deg-front.mp4", "caption": "15° forward — fell; trial terminated after 1.02 s."},
-        {"src": "media/tilt-10deg-left.mp4", "caption": "10° leftward — recovered; feet reposition during recovery."},
-        {"src": "media/tilt-15deg-left.mp4", "caption": "15° leftward — contact between the legs; trial terminated after 0.16 s."}
+        {
+          "src": "media/tilt-10deg-front.mp4",
+          "caption": "10° forward — recovered; full 15-second trial."
+        },
+        {
+          "src": "media/tilt-15deg-front.mp4",
+          "caption": "15° forward — fell; trial terminated after 1.02 s."
+        },
+        {
+          "src": "media/tilt-10deg-left.mp4",
+          "caption": "10° leftward — recovered; feet reposition during recovery."
+        },
+        {
+          "src": "media/tilt-15deg-left.mp4",
+          "caption": "15° leftward — contact between the legs; trial terminated after 0.16 s."
+        }
       ]
     },
     {
@@ -31,11 +66,19 @@
       "context": "Simulation · AI-written",
       "title": "Push recovery: 1 N, 3 N, 5 N",
       "text": "Manfred recovered from 1 N and 3 N pushes in all four directions, but fell at 5 N. Each push lasted 0.2 s; the policy was unchanged. These MuJoCo/MJX results describe this test only—not hardware readiness. Videos below show backward pushes, applied at 5 seconds.",
-      "next": "Test slightly offset starting poses, then ONNX inference in standard MuJoCo.",
       "videos": [
-        {"src": "media/push-1n-back.mp4", "caption": "1 N / 0.2 s — recovered."},
-        {"src": "media/push-3n-back.mp4", "caption": "3 N / 0.2 s — recovered after a larger tilt."},
-        {"src": "media/push-5n-back.mp4", "caption": "5 N / 0.2 s — fell; recording ends when the trial terminates."}
+        {
+          "src": "media/push-1n-back.mp4",
+          "caption": "1 N / 0.2 s — recovered."
+        },
+        {
+          "src": "media/push-3n-back.mp4",
+          "caption": "3 N / 0.2 s — recovered after a larger tilt."
+        },
+        {
+          "src": "media/push-5n-back.mp4",
+          "caption": "5 N / 0.2 s — fell; recording ends when the trial terminates."
+        }
       ]
     }
   ]
