@@ -12,7 +12,7 @@ for section in ("hardware", "software", "specifications"):
 assert isinstance(data["entries"], list)
 slugs = set()
 for entry in data["entries"]:
-    assert set(entry) <= {"slug", "date", "context", "title", "text", "video", "videos", "images"}
+    assert set(entry) <= {"slug", "date", "context", "title", "text", "video", "videos", "images", "table"}
     for field in ("slug", "date", "context", "title", "text"):
         assert isinstance(entry[field], str) and entry[field].strip(), field
     assert re.fullmatch(r"[a-z0-9-]+", entry["slug"])
@@ -38,6 +38,15 @@ for entry in data["entries"]:
         assert re.fullmatch(r"media/[a-zA-Z0-9_/-]+\.mp4", clip["src"])
         assert (root / clip["src"]).is_file()
         assert (root / clip["src"]).with_suffix(".jpg").is_file(), "Missing first-frame poster"
+    if "table" in entry:
+        table = entry["table"]
+        assert set(table) == {"headers", "rows"}
+        assert isinstance(table["headers"], list) and table["headers"]
+        assert all(isinstance(cell, str) and cell.strip() for cell in table["headers"])
+        assert isinstance(table["rows"], list) and table["rows"]
+        for row in table["rows"]:
+            assert isinstance(row, list) and len(row) == len(table["headers"])
+            assert all(isinstance(cell, str) and cell.strip() for cell in row)
 for file in root.rglob("*"):
     assert not file.is_symlink(), f"Symlink not allowed: {file}"
     if file.is_file():

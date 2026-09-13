@@ -4,6 +4,51 @@
   "specifications": [],
   "entries": [
     {
+      "slug": "local-m1-or-cloud-gpu",
+      "date": "2026-09-13",
+      "context": "Training infrastructure · AI-written",
+      "title": "Local checks, cloud training: what the first measurements cost",
+      "text": "The two machines have different jobs. The Apple M1 handles development and FP64/native MuJoCo checks. A rented Runpod Community GPU handles large FP32 training batches; checkpoints and videos return to the Mac for review.\n\nThe local diagnostic reached 8,000 samples in 4 h 28 min. A straight-line projection puts 512,000 near 12 days. A Community RTX 3090 reached 122,880 in 27 min 6 s—about 150× faster—and its successful rental cost roughly $0.16.\n\nFor 512,000 samples, expect about 1 h 53 min of pure training or 2–2.5 hours including setup and reviews. At prices seen during these tests, that is roughly $0.32–$0.55 on the preferred GPUs. These are September 2026 project estimates, not a Runpod quote. Cloud FP32 is for learning; local FP64 is the quality check.",
+      "table": {
+        "headers": ["Machine", "Observed result", "512k estimate", "Cost and role"],
+        "rows": [
+          ["Apple M1, FP64", "8,000 in 4 h 28 min", "About 12 days by linear projection", "No rental; preflight, debugging and quality checks"],
+          ["Community RTX 3090, FP32", "122,880 in 27 min 6 s", "1 h 53 min training; allow 2–2.5 h", "$0.32–$0.55; bulk learning"]
+        ]
+      }
+    },
+    {
+      "slug": "learning-to-walk-is-not-one-movement",
+      "date": "2026-09-13",
+      "context": "Walking · AI-written",
+      "title": "Learning to walk: first, learn to leave the floor",
+      "text": "A step is a sequence: shift weight, unload one foot, lift it, place it and catch the body. The first policies found safer shortcuts instead—turning or sliding their feet without actually stepping.\n\nEven after rewarding foot clearance up to 3 cm, two 20-second reviews measured zero liftoffs and zero single-leg support. A scripted test confirmed that the pose is kinematically possible, but the simulated actuators saturated before completing the movement.\n\nWeight transfer also exposed forearm–thigh collisions. Opening the arms by 5° removed them; the walking reference now uses 10° with a small penalty below 5°. The clips show failed attempts and diagnostics, not a learned gait. All results are simulation-only.",
+      "videos": [
+        {
+          "src": "media/walk-round1-first-attempt.mp4",
+          "caption": "Round 1, 48,640 samples — a six-second excerpt after the forward command begins. The policy changes foot angles but does not establish a step."
+        },
+        {
+          "src": "media/walk-round2-no-liftoff.mp4",
+          "caption": "Round 2, 81,920 samples — another six-second excerpt. Automated review measured zero liftoffs and zero single-support states during the full trial."
+        },
+        {
+          "src": "media/walk-load-transfer-diagnostic.mp4",
+          "caption": "Scripted load-transfer diagnostic—not a policy. It requests a weight shift and 3 cm foot lift; the dynamic response saturates and does not complete the planned motion."
+        },
+        {
+          "src": "media/walk-round3-early-contact-slow.mp4",
+          "caption": "Round 3, 40,960 samples — the original 0.34-second rollout slowed 5×. It terminates on unintended contact before the walking command starts."
+        }
+      ],
+      "images": [
+        {
+          "src": "media/walk-arm-clearance.png",
+          "caption": "Left to right: the same weight-transfer pose with arms at 0°, 5° and 10° outward. Red marks a forearm–thigh proxy contact at 0°; both wider settings are clear."
+        }
+      ]
+    },
+    {
       "slug": "why-collision-boxes",
       "date": "2026-09-12",
       "context": "Simulation · AI-written",

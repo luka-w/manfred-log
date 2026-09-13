@@ -25,6 +25,45 @@ const node = (tag, text, className) => {
   if (className) el.className = className;
   return el;
 };
+// Controlled references keep public prose linkable without accepting HTML in content.json.
+const referenceLinks = new Map([
+  ["MuJoCo/MJX", "https://mujoco.readthedocs.io/en/stable/mjx.html"],
+  ["Runpod Community", "https://docs.runpod.io/pods/overview"],
+  ["NVIDIA RTX 3090", "https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3090-3090ti/"],
+  ["RTX 3090", "https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3090-3090ti/"],
+  ["ONNX Runtime", "https://onnxruntime.ai/"],
+  ["Autodesk Fusion", "https://www.autodesk.com/products/fusion-360/overview"],
+  ["GitHub Pages", "https://pages.github.com/"],
+  ["ACDC4Robot", "https://github.com/ACDC4Robot/Fusion360"],
+  ["ToddlerBot", "https://github.com/hshi74/toddlerbot"],
+  ["Apple M1", "https://www.apple.com/newsroom/2020/11/apple-unleashes-m1/"],
+  ["Remarkbox", "https://www.remarkbox.com/"],
+  ["Runpod", "https://docs.runpod.io/pods/overview"],
+  ["MuJoCo", "https://mujoco.org/"],
+  ["Fusion", "https://www.autodesk.com/products/fusion-360/overview"],
+  ["ONNX", "https://onnx.ai/"],
+  ["MJX", "https://mujoco.readthedocs.io/en/stable/mjx.html"],
+  ["JAX", "https://docs.jax.dev/"],
+  ["PPO", "https://arxiv.org/abs/1707.06347"]
+]);
+const referencePattern = new RegExp(`(${[...referenceLinks.keys()]
+  .sort((a, b) => b.length - a.length)
+  .map(text => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  .join("|")})`, "g");
+function appendLinkedText(el, text) {
+  for (const part of text.split(referencePattern)) {
+    const href = referenceLinks.get(part);
+    if (!href) {
+      el.append(document.createTextNode(part));
+      continue;
+    }
+    const link = node("a", part);
+    link.href = href;
+    el.append(link);
+  }
+  return el;
+}
+const linkedNode = (tag, text, className) => appendLinkedText(node(tag, "", className), text);
 // Public embed identifier supplied by Remarkbox; not a login credential.
 const remarkboxOwner = "67ef1d2d-adcd-11f1-992d-040140774501";
 let remarkboxResizer;
@@ -42,7 +81,7 @@ function commentsFor(entry) {
   const section = node("details", "", "comments");
   section.id = `comments-${entry.slug}`;
   section.append(node("summary", "Comments"));
-  const notice = node("p", "Comments are hosted by Remarkbox. Opening this section connects to their service.", "meta");
+  const notice = linkedNode("p", "Comments are hosted by Remarkbox. Opening this section connects to their service.", "meta");
   // One stable, public URL per entry; never send localhost or tracking queries.
   const thread = new URL("https://luka-w.github.io/manfred-log/");
   thread.searchParams.set("post", entry.slug);
@@ -80,7 +119,7 @@ fetch("content.json").then(response => {
   return response.json();
 }).then(data => {
   for (const section of ["hardware", "software", "specifications"]) {
-    if (data[section].length) document.getElementById(section).replaceChildren(...data[section].map(text => node("li", text)));
+    if (data[section].length) document.getElementById(section).replaceChildren(...data[section].map(text => linkedNode("li", text)));
   }
   const entries = [...data.entries].sort((a, b) => b.date.localeCompare(a.date));
   if (!entries.length) return;
@@ -89,7 +128,24 @@ fetch("content.json").then(response => {
     const article = node("article", "", "entry");
     article.id = entry.slug;
     article.append(node("p", `${entry.date} / ${entry.context}`, "meta"), node("h3", entry.title));
-    for (const paragraph of entry.text.split(/\n\s*\n/)) article.append(node("p", paragraph));
+    for (const paragraph of entry.text.split(/\n\s*\n/)) article.append(linkedNode("p", paragraph));
+    if (entry.table) {
+      const wrapper = node("div", "", "table-wrap");
+      const table = node("table");
+      const head = node("thead");
+      const headRow = node("tr");
+      for (const header of entry.table.headers) headRow.append(linkedNode("th", header));
+      head.append(headRow);
+      const body = node("tbody");
+      for (const row of entry.table.rows) {
+        const tableRow = node("tr");
+        for (const cell of row) tableRow.append(linkedNode("td", cell));
+        body.append(tableRow);
+      }
+      table.append(head, body);
+      wrapper.append(table);
+      article.append(wrapper);
+    }
     const clips = entry.videos || (entry.video ? [{src: entry.video, caption: entry.title}] : []);
     for (const clip of clips) {
       // Only explicit local public media; never embed arbitrary HTML or remote URLs.
@@ -99,7 +155,7 @@ fetch("content.json").then(response => {
       video.controls = true; video.preload = "metadata"; video.playsInline = true;
       video.src = clip.src; video.setAttribute("aria-label", clip.caption);
       video.poster = clip.src.replace(/\.mp4$/, ".jpg");
-      figure.append(video, node("figcaption", clip.caption));
+      figure.append(video, linkedNode("figcaption", clip.caption));
       article.append(figure);
     }
     if (entry.images?.length) {
@@ -113,7 +169,7 @@ fetch("content.json").then(response => {
         img.src = picture.src; img.alt = picture.caption;
         img.loading = "lazy"; img.decoding = "async";
         link.append(img);
-        figure.append(link, node("figcaption", picture.caption));
+        figure.append(link, linkedNode("figcaption", picture.caption));
         gallery.append(figure);
       }
       article.append(gallery);
