@@ -12,9 +12,11 @@ for section in ("hardware", "software", "specifications"):
 assert isinstance(data["entries"], list)
 slugs = set()
 for entry in data["entries"]:
-    assert set(entry) <= {"slug", "date", "context", "title", "text", "video", "videos", "images", "table"}
+    assert set(entry) <= {"slug", "date", "context", "title", "text", "closing", "video", "videos", "images", "table"}
     for field in ("slug", "date", "context", "title", "text"):
         assert isinstance(entry[field], str) and entry[field].strip(), field
+    if "closing" in entry:
+        assert isinstance(entry["closing"], str) and entry["closing"].strip()
     assert re.fullmatch(r"[a-z0-9-]+", entry["slug"])
     assert entry["slug"] not in slugs
     slugs.add(entry["slug"])

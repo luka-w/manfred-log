@@ -4,6 +4,58 @@
   "specifications": [],
   "entries": [
     {
+      "slug": "learning-to-walk-without-a-prescribed-sequence",
+      "date": "2026-09-20",
+      "context": "Walking · AI-written",
+      "title": "Learning to walk without a prescribed joint sequence",
+      "text": "In the first approach, Manfred was not shown which angle every joint should take at every instant. The policy received movement commands and a score for outcomes such as staying upright, following the requested velocity, alternating the feet and limiting sideways drift. It had to discover the movement itself.\n\nThat freedom also made shortcuts possible. An early policy learned to survive for long episodes while moving very little. Its foot-phase score looked strong, but the video showed that the robot had not learned a useful gait. Later runs reduced the importance of that score, rewarded progress along the commanded direction and measured sideways motion separately.\n\nThe most focused run used one fixed command: 0.05 m/s forward. Its starting checkpoint could remain upright for the full 20-second review, but continued training did not turn that behaviour into a reliable walk. Later checkpoints lost balance after 5.32 seconds and 3.84 seconds. A higher training score or a later checkpoint was therefore not enough evidence of progress.\n\nThis experiment improved the way walking is measured, but did not produce a dependable gait. All clips are deterministic simulation reviews; none is a hardware test.",
+      "videos": [
+        {
+          "src": "media/walk-no-reference-v5-72.mp4",
+          "caption": "V5, checkpoint 72 — the policy remains upright for 20 seconds, but mostly stays in place despite changing commands. This exposed a reward shortcut: a long episode and a high foot-phase score did not necessarily mean walking."
+        },
+        {
+          "src": "media/walk-no-reference-v7-240.mp4",
+          "caption": "V7, checkpoint 240 — forward progress and sideways drift are now scored separately. The rollout lasts 20 seconds, but the response is still not a clean, repeatable gait."
+        },
+        {
+          "src": "media/walk-no-reference-v8-start.mp4",
+          "caption": "V8 starting checkpoint — the command is fixed at 0.05 m/s forward. The robot survives the full 20-second review, providing a stable starting point for the focused run rather than proof of learned walking."
+        },
+        {
+          "src": "media/walk-no-reference-v8-late.mp4",
+          "caption": "V8, late checkpoint 1452 — after continued training, balance is lost after 3.84 seconds. The late regression is why checkpoints are judged by rollout behaviour, not by training order alone."
+        }
+      ],
+      "closing": "Why this line of trials stops\n\nSeveral reward revisions and a long fixed-forward continuation still produced shortcuts or regressions instead of repeatable steps. Spending more compute on the same task would not resolve the central problem: the policy was being asked to discover both the walking pattern and the corrections needed to keep it stable. Further trials with this setup are therefore paused.\n\nWhat changes next\n\nThe next approach supplies a 1.40-second reference cycle for 12 leg and 6 arm joints. PPO no longer has to invent the whole sequence; it learns bounded corrections on top of it. Reviews will check completed cycles, forward velocity, heading, foot behaviour and balance, with intermediate checkpoints judged independently from the final one."
+    },
+    {
+      "slug": "learning-to-walk-with-a-reference-cycle",
+      "date": "2026-09-20",
+      "context": "Walking · AI-written",
+      "title": "Learning to walk from a reference cycle",
+      "text": "The second approach gives Manfred a starting pattern: a closed 1.40-second sequence with 70 target poses for 12 leg and 6 arm joints. It is not a prerecorded animation. The targets pass through the same simulated motors, delay, limits and contact physics as any other command, so following them blindly is not enough to stay balanced.\n\nA PPO policy therefore learns small corrections on top of the sequence. After about one million training transitions, the robot still fell after 1.22 seconds without completing a cycle. At 49.97 million transitions, a deterministic review completed five cycles and the full seven-second limit, with a maximum body tilt of 9.54°.\n\nReward retuning then emphasized forward velocity, smooth corrections, heading and flat feet. One checkpoint at 70.37 million total transitions covered 0.358 m in seven seconds and averaged 0.052 m/s forward against a 0.05 m/s command. It was not perfect: its final heading error was 19.0°.\n\nThe final checkpoint was worse. At 79.95 million transitions it fell after 2.18 seconds, moved mainly sideways and ended 58.5° off heading. The useful result is therefore a selected intermediate checkpoint, not simply the last file produced by training. These are deterministic simulation results, not hardware qualification.",
+      "videos": [
+        {
+          "src": "media/walk-reference-early.mp4",
+          "caption": "0.98 million transitions — the policy loses balance after 1.22 seconds and completes no full reference cycle."
+        },
+        {
+          "src": "media/walk-reference-mid.mp4",
+          "caption": "13.03 million transitions — the deterministic review reaches the seven-second limit and completes five cycles; maximum measured tilt is 11.99°."
+        },
+        {
+          "src": "media/walk-reference-selected.mp4",
+          "caption": "70.37 million total transitions — the fastest measured checkpoint in the retuning run: 0.358 m in seven seconds and 0.052 m/s mean forward velocity, with visible heading drift."
+        },
+        {
+          "src": "media/walk-reference-final.mp4",
+          "caption": "79.95 million total transitions — the final checkpoint regresses, falls after 2.18 seconds and travels mainly sideways. Training progress was not monotonic."
+        }
+      ],
+      "closing": "Why this line of trials stops\n\nThe late collapse shows that continuing the same reward retuning is not automatically progress. More importantly, Manfred's simulated body has since moved to V0.2 with newly qualified collision geometry. Replaying the old reference on that body lost balance after 1.02 seconds, before one full cycle. The old motion and its checkpoints cannot be treated as the baseline for further training on the updated robot.\n\nWhat changes next\n\nThe next step is a replacement reference centred on stepping in place and deliberate lateral weight transfer. It must first be qualified on V0.2 by checking joint directions and limits, tracking, contacts, foot loading, balance, command delay and phase closure. Only then will training restart with a fresh policy; checkpoints from the previous body will not be resumed."
+    },
+    {
       "slug": "local-m1-or-cloud-gpu",
       "date": "2026-09-13",
       "context": "Training infrastructure · AI-written",

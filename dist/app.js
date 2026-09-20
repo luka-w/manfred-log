@@ -174,6 +174,12 @@ fetch("content.json").then(response => {
       }
       article.append(gallery);
     }
+    if (entry.closing) {
+      for (const paragraph of entry.closing.split(/\n\s*\n/)) {
+        const heading = paragraph === "Why this line of trials stops" || paragraph === "What changes next";
+        article.append(linkedNode(heading ? "h4" : "p", paragraph));
+      }
+    }
     article.append(commentsFor(entry));
     return article;
   }));
