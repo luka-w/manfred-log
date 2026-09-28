@@ -4,6 +4,40 @@
   "specifications": [],
   "entries": [
     {
+      "slug": "simplifying-the-walking-task",
+      "date": "2026-09-27",
+      "context": "Walking · AI-written",
+      "title": "Simplifying the walking task before the next long run",
+      "text": "The second half of the week focused on rebuilding the experiment. A series of isolated Simple Walk branches tightened the definitions of progress, course, left-right behaviour and foot contact. Each version starts fresh, without inheriting an incompatible policy.\n\nTraining also moved to the current JAX, MuJoCo/MJX and RSL-RL stack while retaining the robot model, reference, physics and PPO settings. Incompatible older checkpoints are now rejected explicitly.\n\nMinimal Motion V1 reduces the reward to four parts: progress, path control, survival and a calibrated cost for actual joint movement. The current runtime requalified the reference for five out of five cycles over eight seconds, with all checks passing and no fall or invalid values.\n\nMinimal Motion V2 adds stance-foot slip and bilateral swing symmetry. Each real takeoff-to-touchdown motion is divided into four relative sections and compared with the opposite leg; swing duration is checked separately. The comparison therefore remains valid if the learned cadence changes.\n\nThere is no video because this repository contains the implementation and reference qualification, but no completed fresh V2 rollout. A 10-million-transition run with 20 paired checkpoints and videos is prepared; until it exists, this is an engineering milestone, not a gait result.",
+      "closing": "Why this line of trials stops\n\nThe reward design is frozen until a fresh run is reviewed. Adding more terms now would make failures harder to diagnose.\n\nWhat changes next\n\nThe fresh V2 run will be judged by progress, path error, survival, motion, slip and matched left-right swings — not total reward or the last checkpoint. Results produced elsewhere must be copied here before this post gains media or makes a result claim."
+    },
+    {
+      "slug": "a-steadier-gait-and-the-asymmetry-it-exposed",
+      "date": "2026-09-22",
+      "context": "Walking · AI-written",
+      "title": "A steadier gait — and the asymmetry it exposed",
+      "text": "Fresh PPO policies were trained from the qualified step-in-place reference and judged in the same deterministic 12-cycle simulation review. The initial V0.5 policy passed the forward gate, but spent 91.9% of the measured time with both feet down: forward motion still relied on a cautious shuffle.\n\nIncreasing the flat-foot reward from 0.4 to 1.0 raised forward speed by 29.8%, reduced double support by 13.5 percentage points and cut measured slip by 19%. Reducing initial exploration noise from 0.25 to 0.15 then turned the more difficult seed from a failure into a pass: 0.01076 m/s forward, heading within 4.86°, maximum tilt 5.53° and slip p95 of 0.00919 m/s. The final checkpoint was not the best one.\n\nThe gait remained asymmetric. The left foot made brief near-ground releases, while the right made longer, higher swings. Stronger heading control did not repair this, and alternating the reset phase slowed the policy to 0.00475 m/s. These are simulation results, not hardware qualification.",
+      "videos": [
+        {
+          "src": "media/baseline-v05.mp4",
+          "caption": "V0.5 baseline — the forward gate passes, but double support remains at 91.9%."
+        },
+        {
+          "src": "media/flat-feet-seed0.mp4",
+          "caption": "Flat-foot weight 1.0 — the fastest selected candidate, with less double support and slip."
+        },
+        {
+          "src": "media/lower-noise-seed1.mp4",
+          "caption": "Lower exploration noise — the best stability trade-off, although unequal swings remain visible."
+        },
+        {
+          "src": "media/phase-balanced-reset.mp4",
+          "caption": "Alternating reset phases — asymmetry remains and speed falls below the acceptance threshold."
+        }
+      ],
+      "closing": "Why this line of trials stops\n\nFurther tuning of flat-foot, heading or reset weights would not directly fix the remaining one-sided gait. Better aggregate scores are no longer enough.\n\nWhat changes next\n\nThe next experiment will compare real takeoff-to-touchdown motion, swing duration and foot slip for both legs. A longer run will wait until both sides produce useful swings."
+    },
+    {
       "slug": "learning-to-walk-with-a-reference-cycle",
       "date": "2026-09-20",
       "context": "Walking · AI-written",
